@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class SocketClient {
+public class SocketClientRunner {
 
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
         System.out.println("hello client");

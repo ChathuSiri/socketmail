@@ -6,7 +6,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class SocketServer {
+public class SocketServerRunner {
     //static ServerSocket variable
     private static ServerSocket server;
     //socket server port on which it will listen

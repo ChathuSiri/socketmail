@@ -2,10 +2,12 @@ package model;
 
 import model.constant.Status;
 
-public class SendEmailAck
+import java.io.Serializable;
+
+public class SendEmailAck implements Serializable
 {
-	String requestId;
-	Status status;
+	private String requestId;
+	private Status status;
 
 	public SendEmailAck()
 	{

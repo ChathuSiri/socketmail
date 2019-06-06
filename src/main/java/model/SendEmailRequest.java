@@ -1,6 +1,9 @@
 package model;
 
-public class SendEmailRequest {
+import java.io.Serializable;
+
+public class SendEmailRequest implements Serializable
+{
     private String requestId;
     private String subject;
     private String message;

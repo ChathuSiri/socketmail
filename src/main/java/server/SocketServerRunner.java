@@ -1,5 +1,9 @@
 package server;
 
+import model.SendEmailAck;
+import model.SendEmailRequest;
+import model.constant.Status;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -24,18 +28,21 @@ public class SocketServerRunner {
             //read from socket to ObjectInputStream object
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
             //convert ObjectInputStream object to String
-            String message = (String) ois.readObject();
-            System.out.println("Message Received: " + message);
+//            String message = (String) ois.readObject();
+            SendEmailRequest sendEmailRequest = ( SendEmailRequest ) ois.readObject();
+            System.out.println("Message Received: " + sendEmailRequest.getRequestId());
             //create ObjectOutputStream object
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             //write object to Socket
-            oos.writeObject("Hi Client " + message);
+//            oos.writeObject("Hi Client " + message);
+            oos.writeObject(new SendEmailAck(sendEmailRequest.getRequestId(), Status.OK  ) );
             //close resources
             ois.close();
             oos.close();
             socket.close();
             //terminate the server if client sends exit request
-            if (message.equalsIgnoreCase("exit")) break;
+//            if (message.equalsIgnoreCase("exit")) break;
+            if (sendEmailRequest.getMessage().equalsIgnoreCase("exit")) break;
         }
         System.out.println("Shutting down Socket server!!");
         //close the ServerSocket object

@@ -13,10 +13,22 @@ public class SendEmailAck implements Serializable
 	{
 	}
 
-	public SendEmailAck( String requestId, Status status )
+	public SendEmailAck(String requestId, Status status)
 	{
 		this.requestId = requestId;
 		this.status = status;
+	}
+
+	public SendEmailAck(String requestId, boolean isSuccess)
+	{
+		this.requestId = requestId;
+		if(isSuccess)
+		{
+			this.status = Status.OK;
+		} else
+		{
+			this.status = Status.ERROR;
+		}
 	}
 
 	public String getRequestId()
@@ -24,7 +36,7 @@ public class SendEmailAck implements Serializable
 		return requestId;
 	}
 
-	public void setRequestId( String requestId )
+	public void setRequestId(String requestId)
 	{
 		this.requestId = requestId;
 	}
@@ -34,7 +46,7 @@ public class SendEmailAck implements Serializable
 		return status;
 	}
 
-	public void setStatus( Status status )
+	public void setStatus(Status status)
 	{
 		this.status = status;
 	}

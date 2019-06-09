@@ -1,58 +1,86 @@
 package client;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import model.SendEmailAck;
 import model.SendEmailRequest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetAddress;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Random;
 
-/**
- * @author chathuram - 6/6/2019
- */
 public class RequestSender implements Runnable
 {
-	InetAddress host;
-	Socket socket;
-	ObjectOutputStream oos;
-	ObjectInputStream ois;
+	private String host;
+	private int port;
+	private ObjectMapper objectMapper;
+	private String requestId;
 
-	public RequestSender() throws IOException
+	public RequestSender(String requestId)
 	{
+		this.requestId = requestId;
+		host = "localhost";
+		port = 9999;
+		objectMapper = new ObjectMapper();
 
 	}
 
 	@Override
 	public void run()
 	{
-		System.out.println("thread running");
-		try
+		try(
+				Socket socket = new Socket(host, port);
+				PrintWriter out =
+						new PrintWriter(socket.getOutputStream(), true);
+				BufferedReader in = new BufferedReader(
+						new InputStreamReader(socket.getInputStream()))
+		)
 		{
-			host = InetAddress.getLocalHost();
-			socket = new Socket( host.getHostName(), 9876 );
-			//write to socket using ObjectOutputStream
-			oos = new ObjectOutputStream( socket.getOutputStream() );
-			SendEmailRequest emailRequest = new SendEmailRequest();
-			emailRequest.setRequestId( "req_id_01" );
-			emailRequest.setSenderName( "Chathura" );
-			emailRequest.setRecipientAddress( "siripala@gmail.com" );
-			emailRequest.setSubject( "Greetings" );
-			emailRequest.setMessage( "Hi siripala,How are you? \nthanks." );
+			SendEmailRequest emailRequest = createMailRequest();
 
-			oos.writeObject( emailRequest );
-			System.out.println("mail sent");
-			ois = new ObjectInputStream( socket.getInputStream() );
-			SendEmailAck ack = ( SendEmailAck ) ois.readObject();
-			System.out.println( ack.getRequestId() + " : " + ack.getStatus() );
+			String writeJson = objectMapper.writeValueAsString(emailRequest);
+			out.println(writeJson);
+			System.out.println("Mail request sent : " + emailRequest.getRequestId());
 
-			ois.close();
-			oos.close();
+			String readValue = in.readLine();
+			SendEmailAck emailAck = objectMapper.readValue(readValue, SendEmailAck.class);
+			System.out.println("Ack received " + emailAck.getRequestId() + " : " + emailAck.getStatus());
+
+			Random r = new Random();
+			int sleepTime = r.nextInt(450) + 50;
+			Thread.sleep(sleepTime);
+			//thread sleeps for a time of 50-500 MS until next request
+			//in order to make socket communication more realistic
+
 		}
-		catch ( IOException | ClassNotFoundException e )
+		catch(JsonProcessingException e)
+		{
+			System.out.println("Error occurred while JSON parsing: " + e.getMessage());
+			e.printStackTrace();
+		}
+		catch(IOException e)
+		{
+			System.out.println("Error occurred in socket connection: " + e.getMessage());
+			e.printStackTrace();
+		}
+		catch(InterruptedException e)
 		{
 			e.printStackTrace();
 		}
+	}
+
+	private SendEmailRequest createMailRequest()
+	{
+		SendEmailRequest emailRequest = new SendEmailRequest();
+		emailRequest.setRequestId(requestId);
+		emailRequest.setSenderName("Chathura");
+		emailRequest.setRecipientAddress("siripala@gmail.com");
+		emailRequest.setSubject(requestId);
+		emailRequest.setMessage("Hi Siripala,How are you? \nregards.");
+
+		return emailRequest;
 	}
 }

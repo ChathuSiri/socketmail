@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.SendEmailAck;
 import model.SendEmailRequest;
+import util.SocketMailLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +19,7 @@ public class RequestSender implements Runnable
 	private int port;
 	private ObjectMapper objectMapper;
 	private String requestId;
+	Random random;
 
 	public RequestSender(String requestId)
 	{
@@ -25,6 +27,7 @@ public class RequestSender implements Runnable
 		host = "localhost";
 		port = 9999;
 		objectMapper = new ObjectMapper();
+		random = new Random();
 
 	}
 
@@ -43,14 +46,13 @@ public class RequestSender implements Runnable
 
 			String writeJson = objectMapper.writeValueAsString(emailRequest);
 			out.println(writeJson);
-			System.out.println("Mail request sent : " + emailRequest.getRequestId());
+			SocketMailLogger.logInfoMessage( "Mail request sent : " + emailRequest.getRequestId() );
 
 			String readValue = in.readLine();
 			SendEmailAck emailAck = objectMapper.readValue(readValue, SendEmailAck.class);
-			System.out.println("Ack received " + emailAck.getRequestId() + " : " + emailAck.getStatus());
+			SocketMailLogger.logInfoMessage( "Ack received " + emailAck.getRequestId() + " : " + emailAck.getStatus() );
 
-			Random r = new Random();
-			int sleepTime = r.nextInt(450) + 50;
+			int sleepTime = random.nextInt(450) + 50;
 			Thread.sleep(sleepTime);
 			//thread sleeps for a time of 50-500 MS until next request
 			//in order to make socket communication more realistic
@@ -58,17 +60,16 @@ public class RequestSender implements Runnable
 		}
 		catch(JsonProcessingException e)
 		{
-			System.out.println("Error occurred while JSON parsing: " + e.getMessage());
-			e.printStackTrace();
+			SocketMailLogger.logErrorMessage( "Error occurred while JSON parsing: " + e.getMessage(), e );
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error occurred in socket connection: " + e.getMessage());
-			e.printStackTrace();
+			SocketMailLogger.logErrorMessage( "Error occurred in socket connection: " + e.getMessage(), e );
 		}
 		catch(InterruptedException e)
 		{
-			e.printStackTrace();
+			SocketMailLogger.logErrorMessage( "Error occurred in requestSender thread running : " + e.getMessage(), e );
+			Thread.currentThread().interrupt();
 		}
 	}
 

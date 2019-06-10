@@ -1,5 +1,7 @@
 package client;
 
+import util.SocketMailLogger;
+
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,11 +11,11 @@ public class SocketClientRunner {
     public static void main(String[] args) {
     	if(args.length!=2)
 		{
-			System.err.println(	"Usage: java SocketClientRunner <no of requests> <no of threads>");
+			SocketMailLogger.logErrorMessage(	"Usage: java SocketClientRunner <no of requests> <no of threads>");
 			System.exit(1);
 		}
 
-        System.out.println("client starting");
+		SocketMailLogger.logInfoMessage("client starting");
 		int numberOfRequests = Integer.parseInt(args[0]);
 		int numberOfThreads = Integer.parseInt(args[1]);
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);

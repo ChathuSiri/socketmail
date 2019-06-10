@@ -26,6 +26,7 @@ public class EmailQueue
 		{
 			return false;
 		}
+		//we can prevent duplicates by check if already exists in the queue
 		this.mailQueue.put(emailRequest);
 		return true;
 	}

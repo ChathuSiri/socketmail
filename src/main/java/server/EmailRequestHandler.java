@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.SendEmailAck;
 import model.SendEmailRequest;
+import util.SocketMailLogger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class EmailRequestHandler implements Runnable
 		{
 			String inputString = in.readLine();
 			SendEmailRequest sendEmailRequest = objectMapper.readValue(inputString, SendEmailRequest.class);
-			System.out.println("Mail request received id: " + sendEmailRequest.getRequestId());
+			SocketMailLogger.logInfoMessage("Mail request received id: " + sendEmailRequest.getRequestId());
 
 
 			boolean status = mailQueue.enqueueMail(sendEmailRequest);
@@ -47,31 +48,22 @@ public class EmailRequestHandler implements Runnable
 			String writeJson = objectMapper.writeValueAsString(emailAck);
 			out.println(writeJson);
 
-			System.out.println("Ack sent " + emailAck.getRequestId() + " : " + emailAck.getStatus());
+			SocketMailLogger.logInfoMessage("Ack sent " + emailAck.getRequestId() + " : " + emailAck.getStatus());
 
 			socket.close();
 		}
 		catch(JsonProcessingException e)
 		{
-			System.out.println("Error occurred while JSON parsing: " + e.getMessage());
-			e.printStackTrace();
-		}
-		catch(InterruptedException e)
-		{
-			System.out.println("EmailRequestHandler interrupted: " + e.getMessage());
-			e.printStackTrace();
-			Thread.currentThread().interrupt();
+			SocketMailLogger.logErrorMessage("Error occurred while JSON parsing: " + e.getMessage(),e);
 		}
 		catch(IOException e)
 		{
-			System.out.println("Exception caught when trying to listening the connection in thread: " + e.getMessage());
-			e.printStackTrace();
+			SocketMailLogger.logErrorMessage("Exception caught when trying to listening the connection in thread: " + e.getMessage(),e);
 		}
-	}
-
-	private boolean validateMailRequest(SendEmailRequest sendEmailRequest)
-	{
-
-		return true;
+		catch(InterruptedException e)
+		{
+			SocketMailLogger.logErrorMessage("EmailRequestHandler interrupted: " + e.getMessage(),e);
+			Thread.currentThread().interrupt();
+		}
 	}
 }

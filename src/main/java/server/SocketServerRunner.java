@@ -1,5 +1,7 @@
 package server;
 
+import util.SocketMailLogger;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
@@ -9,7 +11,7 @@ public class SocketServerRunner
 {
 	public static void main(String[] args)
 	{
-		System.out.println("Server staring");
+		SocketMailLogger.logInfoMessage("Server staring");
 		int port = 9999;
 		boolean listening = true;
 		int noOfMailSenders = 2;
@@ -25,7 +27,7 @@ public class SocketServerRunner
 		ExecutorService mailHandlerExecutor = Executors.newFixedThreadPool(noOfRequestHandlers);
 		try(ServerSocket serverSocket = new ServerSocket(port))
 		{
-			System.out.println("Waiting for the client request");
+			SocketMailLogger.logInfoMessage("Waiting for the client request");
 			while(listening)
 			{
 				mailHandlerExecutor.execute(new EmailRequestHandler(serverSocket.accept(), mailQueue));
@@ -33,8 +35,7 @@ public class SocketServerRunner
 		}
 		catch(IOException e)
 		{
-			System.out.println("Error occurred while listening for a connection: " + e.getMessage());
-			e.printStackTrace();
+			SocketMailLogger.logErrorMessage("Error occurred while listening for a connection: " + e.getMessage(),e);
 		}
 	}
 

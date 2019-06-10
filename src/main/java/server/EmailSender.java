@@ -1,6 +1,7 @@
 package server;
 
 import model.SendEmailRequest;
+import util.SocketMailLogger;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -21,13 +22,9 @@ public class EmailSender implements Runnable
 	private String smtpAuth;
 	private String mailBox;
 
-	private long waitingTime;
-
-
 	public EmailSender(EmailQueue mailQueue)
 	{
 		this.mailQueue = mailQueue;
-		waitingTime = 1000;
 
 		smtpHost = "localhost";
 		smtpPort = "25";
@@ -53,7 +50,7 @@ public class EmailSender implements Runnable
 
 		MimeMessage message = compose(session, emailRequest);
 		send(message);
-		System.out.println("email :" + emailRequest.getRequestId() + " sent");
+		SocketMailLogger.logInfoMessage("email :" + emailRequest.getRequestId() + " sent");
 	}
 
 	private MimeMessage compose(Session session, SendEmailRequest emailRequest) throws MessagingException
@@ -88,18 +85,16 @@ public class EmailSender implements Runnable
 				MimeMessage mail = compose(session, request);
 				send(mail);
 
-				System.out.println("Email sent: " + request.getRequestId());
+				SocketMailLogger.logInfoMessage("Email sent: " + request.getRequestId());
 			}
 			catch(InterruptedException e)
 			{
-				System.out.println("Email sender running interrupted: " + e.getMessage());
-				e.printStackTrace();
+				SocketMailLogger.logErrorMessage("Email sender running interrupted: " + e.getMessage(),e);
 				Thread.currentThread().interrupt();
 			}
 			catch(MessagingException e)
 			{
-				System.out.println("Email sending failed: " + e.getMessage());
-				e.printStackTrace();
+				SocketMailLogger.logErrorMessage("Email sending failed: " + e.getMessage(),e);
 			}
 		}
 	}

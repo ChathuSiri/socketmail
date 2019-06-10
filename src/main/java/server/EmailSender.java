@@ -30,7 +30,7 @@ public class EmailSender implements Runnable
 		waitingTime = 1000;
 
 		smtpHost = "localhost";
-		smtpPort = "35";
+		smtpPort = "25";
 		smtpAuth = "false";
 		mailBox = "companymail.net";
 
